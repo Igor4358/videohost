@@ -7,26 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
-<nav class="bg-gray-800 text-white shadow-lg">
-    <div class="container mx-auto px-4">
-        <div class="flex justify-between items-center h-16">
-            <div class="flex items-center">
-                <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold">Админ панель</a>
-                <div class="ml-10 flex items-center space-x-4">
-                    <a href="{{ route('admin.videos') }}" class="text-gray-300 hover:text-white">← Назад к видео</a>
-                </div>
-            </div>
-            <div class="flex items-center">
-                <a href="{{ route('home') }}" class="text-blue-300 hover:text-blue-100 mr-4">На сайт</a>
-                <span class="text-gray-300 mr-4">{{ Auth::user()->name }}</span>
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="text-gray-300 hover:text-white">Выйти</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
 
 <main class="py-8">
     <div class="container mx-auto px-4 max-w-4xl">
@@ -43,42 +23,25 @@
 
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="p-6">
-                <form action="{{ route('admin.videos.update', $video) }}" method="POST">
+                <form action="{{ route('admin.videos.update', $video) }}" method="POST" id="editForm">
                     @csrf
                     @method('PUT')
 
-                    <!-- Предпросмотр видео -->
                     <div class="mb-6">
                         <label class="block text-gray-700 mb-2 font-medium">Текущее видео</label>
                         <div class="video-container mb-4">
-                            @if($video->platform === 'rutube')
-                                <iframe src="https://rutube.ru/play/embed/{{ $video->video_id }}"
-                                        frameborder="0"
-                                        allowfullscreen></iframe>
-                            @elseif($video->platform === 'vk')
-                                @php
-                                    $parts = explode('_', $video->video_id);
-                                    $oid = $parts[0] ?? '';
-                                    $id = $parts[1] ?? '';
-                                @endphp
-                                <iframe src="https://vk.com/video_ext.php?oid={{ $oid }}&id={{ $id }}"
-                                        frameborder="0"
-                                        allowfullscreen></iframe>
-                            @elseif($video->platform === 'youtube')
-                                <iframe src="https://www.youtube.com/embed/{{ $video->video_id }}"
-                                        frameborder="0"
-                                        allowfullscreen></iframe>
-                            @endif
+                            <iframe src="https://rutube.ru/play/embed/{{ $video->video_id }}"
+                                    frameborder="0"
+                                    allowfullscreen></iframe>
                         </div>
                         <div class="text-sm text-gray-500 space-y-1">
-                            <p><strong>Платформа:</strong> {{ $video->platform }}</p>
+                            <p><strong>Платформа:</strong> RuTube</p>
                             <p><strong>Ссылка:</strong> <a href="{{ $video->url }}" target="_blank" class="text-blue-600 hover:underline">{{ $video->url }}</a></p>
                             <p><strong>Автор:</strong> {{ $video->user->name }}</p>
                             <p><strong>Добавлено:</strong> {{ $video->created_at->format('d.m.Y H:i') }}</p>
                         </div>
                     </div>
 
-                    <!-- Название -->
                     <div class="mb-4">
                         <label for="title" class="block text-gray-700 mb-2 font-medium">Название *</label>
                         <input type="text"
@@ -92,7 +55,6 @@
                         @enderror
                     </div>
 
-                    <!-- Описание -->
                     <div class="mb-4">
                         <label for="description" class="block text-gray-700 mb-2 font-medium">Описание</label>
                         <textarea name="description"
@@ -104,7 +66,6 @@
                         @enderror
                     </div>
 
-                    <!-- Статус -->
                     <div class="mb-6">
                         <label class="flex items-center">
                             <input type="checkbox"
@@ -115,33 +76,34 @@
                             <span class="text-gray-700">Видео одобрено (отображается на сайте)</span>
                         </label>
                     </div>
-
-                    <!-- Кнопки -->
-                    <div class="flex justify-between items-center">
-                        <div class="flex space-x-4">
-                            <a href="{{ route('admin.videos') }}"
-                               class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                                Отмена
-                            </a>
-                            <button type="submit"
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                                Сохранить изменения
-                            </button>
-                        </div>
-
-                        <!-- Кнопка удаления -->
-                        <form action="{{ route('admin.videos.destroy', $video) }}"
-                              method="POST"
-                              onsubmit="return confirm('Вы уверены, что хотите удалить это видео?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                                Удалить видео
-                            </button>
-                        </form>
-                    </div>
                 </form>
+
+                <form action="{{ route('admin.videos.destroy', $video) }}" method="POST" id="deleteForm">
+                    @csrf
+                    @method('DELETE')
+                </form>
+
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-4">
+                        <a href="{{ route('admin.videos') }}"
+                           class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            Отмена
+                        </a>
+
+                        <button type="submit"
+                                form="editForm"
+                                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                            Сохранить изменения
+                        </button>
+                    </div>
+
+                    <button type="submit"
+                            form="deleteForm"
+                            onclick="return confirm('Вы уверены, что хотите удалить это видео?')"
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                        Удалить видео
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -166,5 +128,33 @@
         border: 0;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteForm = document.getElementById('deleteForm');
+        const deleteButton = document.querySelector('button[form="deleteForm"]');
+
+        if (deleteButton) {
+            deleteButton.addEventListener('click', function(e) {
+                if (!confirm('Вы уверены, что хотите удалить это видео? Действие нельзя отменить.')) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        const editForm = document.getElementById('editForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function() {
+                console.log('Отправка формы редактирования (PUT)');
+            });
+        }
+
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function() {
+                console.log('Отправка формы удаления (DELETE)');
+            });
+        }
+    });
+</script>
 </body>
 </html>

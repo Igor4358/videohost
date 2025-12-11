@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Video;
+use App\Services\VideoService;
 use Illuminate\Http\Request;
-use Alaouy\Youtube\Facades\Youtube;
 use Illuminate\Support\Facades\Auth;
 
 class VideoController extends Controller
 {
+    protected $videoService;
+
+    public function __construct(VideoService $videoService)
+    {
+        $this->videoService = $videoService;
+
+    }
+
     public function index()
     {
-        $videos = Video::where('is_approved', true)
-            ->latest()
-            ->paginate(12);
-
+        $videos = $this->videoService->getAllApprovedVideos();
         return view('videos.index', compact('videos'));
     }
 
@@ -31,28 +35,24 @@ class VideoController extends Controller
             'description' => 'nullable|string'
         ]);
 
-        $videoId = Video::extractVideoId($request->url);
-        $platform = Video::detectPlatform($request->url);
-
-        if (!$videoId) {
-            return back()->withErrors(['url' => 'Некорректная ссылка на видео. Поддерживаются: RuTube, VK Video, Яндекс.Эфир']);
+        try {
+            $video = $this->videoService->createVideo($request->all(), Auth::id());
+            return redirect()->route('videos.show', $video);
+        } catch (\InvalidArgumentException $e) {
+            return back()->withErrors(['url' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Ошибка при добавлении видео']);
         }
-
-        $video = Video::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'url' => $request->url,
-            'video_id' => $videoId,
-            'platform' => $platform,
-            'user_id' => Auth::id(),
-            'is_approved' => Auth::user()->role === 'admin'
-        ]);
-
-        return redirect()->route('videos.show', $video);
     }
 
-    public function show(Video $video)
+    public function show($id)
     {
+        $video = $this->videoService->getVideoById($id);
+
+        if (!$video) {
+            abort(404);
+        }
+
         return view('videos.show', compact('video'));
     }
 }

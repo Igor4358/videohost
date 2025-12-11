@@ -5,7 +5,6 @@
 @section('content')
     <div class="max-w-6xl mx-auto py-8">
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <!-- Видео -->
             <div class="p-4">
                 <h1 class="text-3xl font-bold mb-4">{{ $video->title }}</h1>
 
@@ -47,7 +46,6 @@
                         </div>
                     @endif
                 </div>
-                <!-- Информация о видео -->
                 <div class="mb-6">
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center">
@@ -71,7 +69,6 @@
                         @endif
                     </div>
 
-                    <!-- Описание -->
                     @if($video->description)
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h3 class="font-bold text-lg mb-2">Описание</h3>
@@ -82,7 +79,6 @@
             </div>
         </div>
 
-        <!-- Кнопка назад -->
         <div class="mt-6">
             <a href="{{ route('videos.index') }}"
                class="inline-flex items-center text-blue-600 hover:text-blue-800">

@@ -5,47 +5,70 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Video;
 use App\Models\User;
+use App\Services\UserService;
+use App\Services\VideoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-
 class AdminController extends Controller
 {
-   // public function __construct()
-   // {
-   //     $this->middleware(['auth', 'admin']);
-   // }
+    protected $videoService;
+    protected $userService;
 
-    // Главная админки
+    public function __construct(VideoService $videoService, UserService $userService)
+    {
+        $this->videoService = $videoService;
+        $this->userService = $userService;
+    }
+
     public function dashboard()
     {
-        $stats = [
-            'total_videos' => Video::count(),
-            'pending_videos' => Video::where('is_approved', false)->count(),
-            'total_users' => User::count(),
-            'new_users_today' => User::whereDate('created_at', today())->count()
-        ];
-
-        $recent_videos = Video::latest()->take(5)->get();
-        $recent_users = User::latest()->take(5)->get();
+        $stats = $this->userService->getDashboardStats();
+        $recent_videos = $this->videoService->getAllVideosForAdmin()->take(5);
+        $recent_users = $this->userService->getAllUsersWithStats()->take(5);
 
         return view('admin.dashboard', compact('stats', 'recent_videos', 'recent_users'));
     }
 
-    // Список всех видео
     public function videos()
     {
-        $videos = Video::with('user')->latest()->paginate(20);
+        $videos = $this->videoService->getAllVideosForAdmin();
         return view('admin.videos.index', compact('videos'));
     }
 
-    // Форма создания видео
+    public function editVideo($id)
+    {
+        $video = $this->videoService->getVideoById($id);
+        return view('admin.videos.edit', compact('video'));
+    }
+
+    public function updateVideo(Request $request, Video $video)
+    {
+        \Log::info('AdminController updateVideo called', [
+            'video_id' => $video->id,
+            'request_data' => $request->all()
+        ]);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_approved' => 'boolean'
+        ]);
+
+        try {
+            $this->videoService->updateVideo($video->id, $request->all());
+            return redirect()->route('admin.videos')->with('success', 'Видео обновлено');
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            \Log::error('Video not found: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Видео не найдено']);
+        } catch (\Exception $e) {
+            \Log::error('Error updating video: ' . $e->getMessage());
+            return back()->withErrors(['error' => 'Ошибка при обновлении видео: ' . $e->getMessage()]);
+        }
+    }
     public function createVideo()
     {
         return view('admin.videos.create');
     }
-
-    // Сохранение видео
     public function storeVideo(Request $request)
     {
         $request->validate([
@@ -54,99 +77,80 @@ class AdminController extends Controller
             'description' => 'nullable|string'
         ]);
 
-        $videoId = Video::extractVideoId($request->url);
-        $platform = Video::detectPlatform($request->url);
+        $videoId = \App\Models\Video::extractVideoId($request->url);
 
         if (!$videoId) {
-            return back()->withErrors(['url' => 'Некорректная ссылка на видео']);
+            return back()->withErrors(['url' => 'Некорректная ссылка на RuTube видео']);
         }
 
-        Video::create([
+        \App\Models\Video::create([
             'title' => $request->title,
             'description' => $request->description,
             'url' => $request->url,
             'video_id' => $videoId,
-            'platform' => $platform,
+            'platform' => 'rutube',
             'user_id' => Auth::id(),
             'is_approved' => true // Автоодобрение для админов
         ]);
 
         return redirect()->route('admin.videos')->with('success', 'Видео добавлено');
     }
-
-    // Форма редактирования видео
-    public function editVideo(Video $video)
+    public function destroyVideo($id)
     {
-        return view('admin.videos.edit', compact('video'));
-    }
-
-    // Обновление видео
-    public function updateVideo(Request $request, Video $video)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_approved' => 'boolean'
-        ]);
-
-        $video->update([
-            'title' => $request->title,
-            'description' => $request->description,
-            'is_approved' => $request->has('is_approved')
-        ]);
-
-        return redirect()->route('admin.videos')->with('success', 'Видео обновлено');
-    }
-
-    // Удаление видео
-    public function destroyVideo(Video $video)
-    {
-        $video->delete();
+        $this->videoService->deleteVideo($id);
         return redirect()->route('admin.videos')->with('success', 'Видео удалено');
     }
 
-    // Одобрение видео
-    public function approveVideo(Video $video)
+    public function approveVideo($id)
     {
-        $video->update(['is_approved' => true]);
+        $this->videoService->approveVideo($id);
         return back()->with('success', 'Видео одобрено');
     }
 
-    // Список пользователей
     public function users()
     {
-        // Загружаем пользователей с подсчетом видео
-        $users = User::withCount('videos')->latest()->paginate(20);
+        $users = $this->userService->getAllUsersWithStats();
         return view('admin.users.index', compact('users'));
     }
 
-    // Изменение роли пользователя
-    public function updateUserRole(Request $request, User $user)
+    public function updateUserRole(Request $request, User $user) // Model Binding
     {
-        Log::info('=== ОБНОВЛЕНИЕ РОЛИ ===');
-        Log::info('Пользователь:', ['id' => $user->id, 'name' => $user->name]);
-        Log::info('Текущая роль:', ['role' => $user->role]);
-        Log::info('Новая роль из формы:', ['new_role' => $request->input('role')]);
+        \Log::info('Admin: updateUserRole called', [
+            'user_id' => $user->id,
+            'current_role' => $user->role,
+            'request_data' => $request->all(),
+            'auth_user' => auth()->id(),
+        ]);
 
         $request->validate([
             'role' => 'required|in:user,admin'
         ]);
 
-        // Сохраняем старую роль для сообщения
-        $oldRole = $user->role;
+        \Log::debug('Validation passed', ['role' => $request->role]);
 
-        // Обновляем роль
-        $user->role = $request->role;
-        $saved = $user->save();
+        try {
+            $oldRole = $user->role;
 
-        Log::info('Результат сохранения:', ['success' => $saved]);
+            $user->role = $request->role;
+            $user->save();
 
-        if ($saved) {
-            Log::info('Роль обновлена успешно!');
-            return back()->with('success', "Роль пользователя {$user->name} изменена с '{$oldRole}' на '{$user->role}'");
-        } else {
-            Log::error('Ошибка сохранения роли!');
-            return back()->with('error', 'Ошибка обновления роли');
+            \Log::info('Role updated successfully', [
+                'user_id' => $user->id,
+                'old_role' => $oldRole,
+                'new_role' => $user->role,
+                'updated_by' => auth()->id()
+            ]);
+
+            return back()->with('success', 'Роль обновлена');
+
+        } catch (\Exception $e) {
+            \Log::error('Error updating user role', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->with('error', 'Ошибка при обновлении роли: ' . $e->getMessage());
         }
     }
 }

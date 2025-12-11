@@ -6,7 +6,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Видеохостинг') - VideoHost</title>
 
-    <!-- Tailwind CSS (если используете) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -105,7 +104,6 @@
     </div>
 </nav>
 
-<!-- Основной контент -->
 <main class="py-8">
     <div class="container mx-auto px-4">
         <div class="mb-8">
@@ -113,7 +111,6 @@
             <p class="text-gray-600 mt-2">Смотрите видео с RuTube </p>
         </div>
 
-        <!-- Сообщения об успехе/ошибках -->
         @if(session('success'))
             <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
                 {{ session('success') }}
@@ -126,7 +123,6 @@
             </div>
         @endif
 
-        <!-- Список видео -->
         @if($videos->isEmpty())
             <div class="text-center py-16 bg-white rounded-lg shadow">
                 <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -154,7 +150,6 @@
                 @endauth
             </div>
         @else
-            <!-- Сетка видео -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @foreach($videos as $video)
                     <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
@@ -162,7 +157,6 @@
                         <a href="{{ route('videos.show', $video) }}" class="block">
                             <div class="video-container">
                                 @if($video->platform === 'rutube')
-                                    <!-- RuTube -->
                                     <iframe
                                         src="https://rutube.ru/play/embed/{{ $video->video_id }}"
                                         frameborder="0"
@@ -172,7 +166,6 @@
                                         allowFullScreen>
                                     </iframe>
                                 @elseif($video->platform === 'vk')
-                                    <!-- VK Video -->
                                     @php
                                         $vk_parts = explode('_', $video->video_id);
                                         $vk_oid = $vk_parts[0] ?? '';
@@ -194,35 +187,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                @elseif($video->platform === 'youtube')
-                                    <!-- YouTube -->
-                                    <iframe
-                                        src="https://www.youtube.com/embed/{{ $video->video_id }}"
-                                        frameborder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen>
-                                    </iframe>
-                                @elseif($video->platform === 'vimeo')
-                                    <!-- Vimeo -->
-                                    <iframe
-                                        src="https://player.vimeo.com/video/{{ $video->video_id }}"
-                                        frameborder="0"
-                                        allow="autoplay; fullscreen; picture-in-picture"
-                                        allowfullscreen>
-                                    </iframe>
-                                @elseif($video->platform === 'yandex')
-                                    <!-- Яндекс -->
-                                    <div class="flex items-center justify-center h-full bg-gradient-to-r from-red-500 to-yellow-500">
-                                        <div class="text-center text-white p-4">
-                                            <div class="text-xl mb-2">Яндекс.Эфир</div>
-                                            <a href="{{ $video->url }}" target="_blank"
-                                               class="inline-block bg-white text-red-600 px-4 py-2 rounded font-medium hover:bg-gray-100">
-                                                Смотреть
-                                            </a>
-                                        </div>
-                                    </div>
                                 @else
-                                    <!-- Другие платформы -->
                                     <div class="flex items-center justify-center h-full bg-gray-800">
                                         <div class="text-center text-white p-4">
                                             <svg class="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,25 +204,20 @@
                             </div>
                         </a>
 
-                        <!-- Информация о видео -->
                         <div class="p-4">
-                            <!-- Заголовок -->
                             <a href="{{ route('videos.show', $video) }}" class="block">
                                 <h3 class="font-bold text-lg mb-2 truncate" title="{{ $video->title }}">
                                     {{ $video->title }}
                                 </h3>
                             </a>
 
-                            <!-- Описание -->
                             @if($video->description)
                                 <p class="text-gray-600 text-sm mb-3 line-clamp-2" title="{{ $video->description }}">
                                     {{ $video->description }}
                                 </p>
                             @endif
 
-                            <!-- Мета-информация -->
                             <div class="flex justify-between items-center text-sm">
-                                <!-- Автор -->
                                 <div class="flex items-center text-gray-500">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -265,13 +225,11 @@
                                     <span>{{ $video->user->name }}</span>
                                 </div>
 
-                                <!-- Дата -->
                                 <span class="text-gray-500" title="{{ $video->created_at->format('d.m.Y H:i') }}">
                                 {{ $video->created_at->format('d.m.Y') }}
                             </span>
                             </div>
 
-                            <!-- Платформа -->
                             <div class="mt-2">
                                 @php
                                     $platformColors = [
@@ -298,7 +256,6 @@
                 @endforeach
             </div>
 
-            <!-- Пагинация -->
             @if($videos->hasPages())
                 <div class="mt-12">
                     {{ $videos->links() }}
@@ -306,7 +263,6 @@
             @endif
         @endif
 
-        <!-- Кнопка добавления -->
         @auth
             <div class="mt-8 text-center">
                 <a href="{{ route('videos.create') }}"
@@ -321,7 +277,6 @@
     </div>
 </main>
 
-<!-- Футер -->
 <footer class="bg-gray-800 text-white py-8 mt-12">
     <div class="container mx-auto px-4">
         <div class="text-center">
@@ -331,11 +286,8 @@
     </div>
 </footer>
 
-<!-- Скрипты -->
 <script>
-    // Добавляем обработчик для алертов
     document.addEventListener('DOMContentLoaded', function() {
-        // Автоматически скрываем алерты через 5 секунд
         setTimeout(function() {
             const alerts = document.querySelectorAll('.bg-green-100, .bg-red-100');
             alerts.forEach(alert => {
@@ -345,7 +297,6 @@
             });
         }, 5000);
 
-        // Подтверждение удаления (если есть)
         const deleteForms = document.querySelectorAll('form[data-confirm]');
         deleteForms.forEach(form => {
             form.addEventListener('submit', function(e) {

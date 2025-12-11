@@ -25,7 +25,6 @@ class Video extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Метод для извлечения ID видео из разных платформ
     public static function extractVideoId($url)
     {
         // Для RuTube

@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50">
-<!-- Навигация -->
 <nav class="bg-gray-800 text-white shadow-lg">
     <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
@@ -100,7 +99,6 @@
             </div>
         </div>
 
-        <!-- Быстрые действия -->
         <div class="mb-8">
             <div class="flex space-x-4">
                 <a href="{{ route('admin.videos.create') }}"
@@ -118,7 +116,6 @@
             </div>
         </div>
 
-        <!-- Последние видео и пользователи -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Последние видео -->
             <div class="bg-white rounded-lg shadow">
@@ -159,7 +156,6 @@
                 </div>
             </div>
 
-            <!-- Последние пользователи -->
             <div class="bg-white rounded-lg shadow">
                 <div class="p-4 border-b">
                     <h2 class="text-xl font-bold flex justify-between items-center">

@@ -10,20 +10,20 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Временно отключим проверку для теста
-        return $next($request);
-
-        /*
-        // Позже раскомментируйте:
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
         if (Auth::user()->role !== 'admin') {
-            abort(403, 'Доступ запрещен');
+            \Log::warning('Non-admin user tried to access admin area', [
+                'user_id' => Auth::id(),
+                'user_role' => Auth::user()->role,
+                'path' => $request->path()
+            ]);
+
+            abort(403, 'Доступ запрещен. Требуются права администратора.');
         }
 
         return $next($request);
-        */
     }
 }
