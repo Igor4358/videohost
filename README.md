@@ -1,59 +1,121 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+📺 VideoHost Project
+📋 Краткое описание
+VideoHost - это видеохостинг-платформа на Laravel, позволяющая пользователям делиться видео с RuTube по ссылкам. Проект включает регистрацию пользователей, систему ролей (пользователь/администратор) и полноценную админ-панель для управления контентом.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+🎯 Цель разработки
+Создание современной веб-платформы для размещения и управления видео-контентом с фокусом на:
+Простоте добавления видео по ссылкам
+Модерации контента
+Удобном пользовательском интерфейсе
+Архитектурной чистоте (паттерны Repository и Service Layer)
 
-## About Laravel
+✨ Основные функции и возможности
+👤 Для пользователей:
+✅ Регистрация и авторизация
+✅ Просмотр списка всех одобренных видео
+✅ Добавление новых видео по ссылкам RuTube
+✅ Просмотр детальной информации о видео
+✅ Личный кабинет (профиль)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+👑 Для администраторов:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+✅ Полнофункциональная админ-панель
+✅ Управление видео (CRUD операции)
+✅ Одобрение/отклонение видео на модерации
+✅ Управление пользователями (смена ролей)
+✅ Статистика платформы (дашборд)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+🛠 Применённые технологии
+Backend:
+PHP 8.2 - основной язык разработки
+Laravel - фреймворк
+MySQL/SQLite - база данных
+Laravel Breeze - аутентификация
+Frontend:
+Tailwind CSS - стилизация
+Blade Templates - шаблонизатор
+JavaScript (Vanilla) - клиентская логика
+Архитектурные паттерны:
+Repository Pattern - изоляция слоя данных
+Service Layer - бизнес-логика
+MVC - основная архитектура
+Dependency Injection - управление зависимостями
 
-## Learning Laravel
+Дополнительно:
+Middleware для контроля доступа
+Eloquent ORM для работы с БД
+Migrations для управления схемой БД
+Seeders для тестовых данных
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+🚀 Инструкция по развёртыванию
+1. Предварительные требования
+PHP ≥ 8.2
+Composer
+Node.js и npm (для фронтенда)
+MySQL или SQLite
+Git
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. Клонирование репозитория
+git clone <repository-url>
+cd videohost
+3. Установка зависимостей
+# PHP зависимости
+composer install
 
-## Laravel Sponsors
+# JavaScript зависимости 
+npm install
+npm run build
+4. Настройка окружения
+# Копируем файл окружения
+cp .env.example .env
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# Генерируем ключ приложения
+php artisan key:generate
+5. Настройка .env файла
+env
+APP_NAME=VideoHost
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
 
-### Premium Partners
+DB_CONNECTION=mysql  # или sqlite для тестов
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=videohost
+DB_USERNAME=root
+DB_PASSWORD=
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# Для SQLite:
+# DB_CONNECTION=sqlite
+# DB_DATABASE=/absolute/path/to/database.sqlite
+6. Миграции и сиды
+# Создание таблиц в БД
+php artisan migrate
 
-## Contributing
+# Опционально: заполнение тестовыми данными
+php artisan db:seed
+7. Создание первого администратора
+php artisan tinker
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# В открывшейся консоли:
+\App\Models\User::create([
+    'name' => 'Admin',
+    'email' => 'admin@example.com',
+    'password' => bcrypt('password123'),
+    'role' => 'admin'
+]);
+8. Запуск сервера
+php artisan serve
 
-## Code of Conduct
+# Или с указанием порта
+php artisan serve --port=8080
+9. Доступ к приложению
+Основной сайт: http://localhost:8000
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Админ-панель: http://localhost:8000/admin
 
-## Security Vulnerabilities
+Логин админа: admin@example.com / password123
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+🧪 Тестирование
+# Запуск всех тестов
+php artisan test
